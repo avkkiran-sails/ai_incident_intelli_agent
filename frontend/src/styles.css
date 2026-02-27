@@ -135,6 +135,7 @@ h6 {
   padding: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   vertical-align: middle;
+  text-align: left;
 }
 
 .data-table tbody tr {
