@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { IncidentService } from './services/incident.service';
 import { IncidentRequest, IncidentResponse } from './models/incident.model';
@@ -7,7 +8,7 @@ import { IncidentRequest, IncidentResponse } from './models/incident.model';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -23,17 +24,33 @@ export class AppComponent implements OnInit {
     this.updateTitle();
   }
 
+  isSidebarCollapsed = false;
+
   incident: IncidentResponse | null = null;
   loading = false;
   actionMessage = '';
 
   activeIncidentsList: any[] = [];
   rcaHistoryList: any[] = [];
+  workflowRunsList: any[] = [];
+  selectedWorkflowIncidentId: string | null = null;
   currentPage = 1;
   itemsPerPage = 10;
 
   sortField: 'timestamp' | 'severity' = 'timestamp';
   sortDirection: 'asc' | 'desc' = 'desc';
+
+  // Settings State
+  settings = {
+    apiKey: 'sk-xxxxxxxxxxxxxxxxxxxxxxxx',
+    model: 'gemini-1.5-pro',
+    temperature: 0.2,
+    jiraUrl: 'https://company.atlassian.net',
+    githubToken: 'ghp_xxxxxxxxxxxxxxxxxxxxxx',
+    autoApproveLowSeverity: false,
+    vectorDbEnabled: true
+  };
+  settingsSaved = false;
 
   constructor(private incidentService: IncidentService, private titleService: Title) {
     this.updateTitle();
@@ -112,6 +129,38 @@ export class AppComponent implements OnInit {
     }
   }
 
+  get displayedWorkflowRuns() {
+    if (this.selectedWorkflowIncidentId) {
+      return this.workflowRunsList.filter(run => run.incidentId === this.selectedWorkflowIncidentId);
+    }
+    return this.workflowRunsList;
+  }
+
+  viewAgentWorkflow(incidentId: string) {
+    this.selectedWorkflowIncidentId = incidentId;
+    this.activeTab = 'Agent Workflows';
+  }
+
+  get totalActiveIncidents() {
+    return this.activeIncidentsList.length;
+  }
+
+  get pendingRCAs() {
+    return this.activeIncidentsList.filter(i => !i.analyzed).length;
+  }
+
+  get publishedRCAs() {
+    return this.rcaHistoryList.length;
+  }
+
+  get workflowsRun() {
+    return this.workflowRunsList.length;
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
   updateTitle() {
     this.titleService.setTitle(`${this.title} | ${this.activeTab}`);
   }
@@ -121,7 +170,8 @@ export class AppComponent implements OnInit {
   }
 
   analyzeIncidentFromList(inc: any) {
-    this.activeTab = 'Dashboard';
+    inc.analyzed = true;
+    this.activeTab = 'Root Cause Analysis';
     this.analyzeIncident({
       incidentId: inc.id,
       description: inc.description
@@ -138,6 +188,30 @@ export class AppComponent implements OnInit {
         next: (res) => {
           this.incident = res;
           this.loading = false;
+
+          if (!this.workflowRunsList.find(w => w.incidentId === res.incidentId)) {
+            const step1 = parseFloat((Math.random() * 1.5 + 0.1).toFixed(1));
+            const step2 = parseFloat((Math.random() * 2.0 + 0.5).toFixed(1));
+            const step3 = parseFloat((Math.random() * 1.0 + 0.2).toFixed(1));
+            const step4 = parseFloat((Math.random() * 1.5 + 0.5).toFixed(1));
+            const step5 = parseFloat((Math.random() * 2.5 + 1.0).toFixed(1));
+            const totalDuration = (step1 + step2 + step3 + step4 + step5).toFixed(1);
+
+            this.workflowRunsList.unshift({
+              id: `WF-${Math.floor(Math.random() * 9000) + 1000}`,
+              incidentId: res.incidentId,
+              status: 'Completed',
+              startTime: new Date().toISOString(),
+              duration: `${totalDuration}s`,
+              steps: [
+                { name: 'Extract Logs', status: 'Success', icon: '📝', time: `${step1}s` },
+                { name: 'Query Vector DB', status: 'Success', icon: '🔍', time: `${step2}s` },
+                { name: 'Fetch Jira Issues', status: 'Success', icon: '🎫', time: `${step3}s` },
+                { name: 'Fetch GitHub Commits', status: 'Success', icon: '🔗', time: `${step4}s` },
+                { name: 'Generate RCA Hypothesis', status: 'Success', icon: '🧠', time: `${step5}s` }
+              ]
+            });
+          }
         },
         error: (err) => {
           console.error(err);
@@ -175,5 +249,12 @@ export class AppComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  saveSettings() {
+    this.settingsSaved = true;
+    setTimeout(() => {
+      this.settingsSaved = false;
+    }, 3000);
   }
 }
