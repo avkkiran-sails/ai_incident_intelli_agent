@@ -15,6 +15,10 @@
       <div class="nav-item" [class.active]="activeTab === 'Dashboard'" (click)="activeTab = 'Dashboard'">
         <span class="icon">🏠</span><span class="nav-text">Dashboard</span>
       </div>
+      <div class="nav-item" [class.active]="activeTab === 'Root Cause Analysis'"
+        (click)="activeTab = 'Root Cause Analysis'">
+        <span class="icon">🔍</span><span class="nav-text">Root Cause Analysis</span>
+      </div>
       <div class="nav-item" [class.active]="activeTab === 'Active Incidents'" (click)="activeTab = 'Active Incidents'">
         <span class="icon">🔥</span><span class="nav-text">Active Incidents</span>
       </div>
@@ -37,10 +41,47 @@
     <!-- Dashboard View -->
     <ng-container *ngIf="activeTab === 'Dashboard'">
       <div class="top-bar">
-        <h1>Incident Intelli Agent</h1>
-        <button class="btn-primary" (click)="triggerMockIncident()" [disabled]="loading">
-          {{ loading ? 'Analyzing...' : 'Trigger Mock Incident' }}
-        </button>
+        <h1>Dashboard Overview</h1>
+      </div>
+
+      <div class="settings-grid animate-fade-in"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+        <div class="glass-panel" style="text-align: center;">
+          <div class="icon" style="font-size: 2rem; margin-bottom: 12px;">🔥</div>
+          <h3 style="color: var(--text-secondary); margin-bottom: 10px; font-size: 1rem;">Total Active Incidents</h3>
+          <div style="font-size: 3rem; font-weight: 700; color: #fff;">{{ totalActiveIncidents }}</div>
+        </div>
+        <div class="glass-panel" style="text-align: center;">
+          <div class="icon" style="font-size: 2rem; margin-bottom: 12px;">⏳</div>
+          <h3 style="color: var(--text-secondary); margin-bottom: 10px; font-size: 1rem;">Pending RCAs</h3>
+          <div style="font-size: 3rem; font-weight: 700; color: var(--accent-red);">{{ pendingRCAs }}</div>
+        </div>
+        <div class="glass-panel" style="text-align: center;">
+          <div class="icon" style="font-size: 2rem; margin-bottom: 12px;">✅</div>
+          <h3 style="color: var(--text-secondary); margin-bottom: 10px; font-size: 1rem;">Published RCAs</h3>
+          <div style="font-size: 3rem; font-weight: 700; color: var(--accent-green);">{{ publishedRCAs }}</div>
+        </div>
+        <div class="glass-panel" style="text-align: center;">
+          <div class="icon" style="font-size: 2rem; margin-bottom: 12px;">🤖</div>
+          <h3 style="color: var(--text-secondary); margin-bottom: 10px; font-size: 1rem;">AI Workflows Run</h3>
+          <div style="font-size: 3rem; font-weight: 700; color: var(--accent-blue);">{{ workflowsRun }}</div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Root Cause Analysis View -->
+    <ng-container *ngIf="activeTab === 'Root Cause Analysis'">
+      <div class="top-bar">
+        <h1>Root Cause Analysis Engine</h1>
+      </div>
+
+      <div class="glass-panel animate-fade-in" *ngIf="!incident && !loading"
+        style="text-align: center; padding: 40px; color: var(--text-secondary);">
+        <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
+        <h2>No Incident Selected</h2>
+        <p style="margin-top: 10px; font-size: 1.1rem;">Please navigate to the <b
+            style="color: var(--text-primary);">Active Incidents</b> tab and click <b
+            style="color: var(--accent-blue);">Analyze with AI</b> to begin a Root Cause Analysis.</p>
       </div>
 
       <!-- Loading State -->
@@ -432,7 +473,7 @@
 
     <!-- Placeholder Views -->
     <ng-container
-      *ngIf="activeTab !== 'Dashboard' && activeTab !== 'Active Incidents' && activeTab !== 'RCA History' && activeTab !== 'Agent Workflows' && activeTab !== 'Settings'">
+      *ngIf="activeTab !== 'Dashboard' && activeTab !== 'Root Cause Analysis' && activeTab !== 'Active Incidents' && activeTab !== 'RCA History' && activeTab !== 'Agent Workflows' && activeTab !== 'Settings'">
       <div class="top-bar">
         <h1>{{ activeTab }}</h1>
       </div>

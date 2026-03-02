@@ -141,6 +141,22 @@ export class AppComponent implements OnInit {
     this.activeTab = 'Agent Workflows';
   }
 
+  get totalActiveIncidents() {
+    return this.activeIncidentsList.length;
+  }
+
+  get pendingRCAs() {
+    return this.activeIncidentsList.filter(i => !i.analyzed).length;
+  }
+
+  get publishedRCAs() {
+    return this.rcaHistoryList.length;
+  }
+
+  get workflowsRun() {
+    return this.workflowRunsList.length;
+  }
+
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
@@ -155,7 +171,7 @@ export class AppComponent implements OnInit {
 
   analyzeIncidentFromList(inc: any) {
     inc.analyzed = true;
-    this.activeTab = 'Dashboard';
+    this.activeTab = 'Root Cause Analysis';
     this.analyzeIncident({
       incidentId: inc.id,
       description: inc.description
